@@ -40,50 +40,91 @@ private:
 };
 
 template <typename T>
-SLinkedList<T>::SLinkedList() : head_(nullptr), size_(0) {}
+SLinkedList<T>::SLinkedList() : head_(nullptr), size_(0) {
+    size_ = 0;
+    head_ = new SNode<T>(T(), nullptr);
+    head_->next = nullptr;
+}
 
 template <typename T>
 SLinkedList<T>::~SLinkedList() {
 //TODO: Implement the destructor for the SLinkedList class
+    clear();
+    delete head_;
 }
 
 template <typename T>
 SLinkedList<T>::SLinkedList(const SLinkedList& other) : head_(nullptr), size_(0) {
 //TODO: Implement the copy constructor for the SLinkedList class
+    head_ = new SNode<T> (T(), nullptr);
+    head_->next = nullptr;
+    for (SNode<T>* curr = other.head_->next; curr != nullptr; curr = curr->next)
+        push_back(curr->value);
+
 }
 
 template <typename T>
 SLinkedList<T>& SLinkedList<T>::operator=(const SLinkedList& other) {
-//TODO: Implement the assignment operator for the SLinkedList class
-
+    if (this != &other) {
+        clear();
+        for (SNode<T>* current = other.head_->next; current != nullptr; current = current->next) {
+            push_back(current->value);
+        }
+    }
+    return *this;
 }
 
 template <typename T>
 void SLinkedList<T>::push_front(const T& value) {
-// TODO: Implement the push_front function for the SLinkedList class
+    SNode<T>* new_node = new SNode<T>(value, head_->next);
+    head_->next = new_node;
+    ++size_;
 }
 
 template <typename T>
 void SLinkedList<T>::push_back(const T& value) {
-// TODO: Implement the push_back function for the SLinkedList class
-
+    SNode<T>* last_node = head_;
+    while (last_node->next != nullptr) {
+        last_node = last_node->next;
+    }
+    last_node->next = new SNode<T>(value, nullptr);
+    ++size_;
 }
 
 template <typename T>
 bool SLinkedList<T>::pop_front() {
-// TODO: Implement the pop_front function for the SLinkedList class
+    if (empty()) {
+        return false;
+    }
+    SNode<T>* popNode = head_->next;
+    head_->next = popNode->next;
+    delete popNode;
+    --size_;
+    return true;
 }
 
 template <typename T>
 bool SLinkedList<T>::pop_back() {
-// TODO: Implement the pop_back function for the SLinkedList class
-
+    if (empty()) {
+        return false;
+    }
+    SNode<T>* previous = head_;
+    while (previous->next->next != nullptr) {
+        previous = previous->next;
+    }
+    delete previous->next;
+    previous->next = nullptr;
+    --size_;
+    return true;
 }
 
 template <typename T>
 T& SLinkedList<T>::front() {
 // TODO: Implement the front function for the SLinkedList class
-    
+    if (empty()) {
+        throw std:: out_of_range("SLinkedList is empty");
+    }
+    return head_->next->value;
 }
 
 template <typename T>
@@ -91,32 +132,35 @@ const T& SLinkedList<T>::front() const {
     if (empty()) {
         throw std::out_of_range("SLinkedList is empty");
     }
-    return head_->value;
+    return head_->next->value;
 }
 
 template <typename T>
 std::size_t SLinkedList<T>::size() const noexcept {
 // TODO: Implement the size function for the SLinkedList class
-    
+    return size_;
 }
 
 template <typename T>
 bool SLinkedList<T>::empty() const noexcept {
-// TODO: Implement the empty function for the SLinkedList class
-    
+    return size_ == 0;
 }
 
 template <typename T>
 bool SLinkedList<T>::contains(const T& value) const {
 // TODO: Implement the contains function for the SLinkedList class
-    
+    for (SNode<T>* current = head_->next; current != nullptr; current = current->next) {
+        if(current->value == value)
+            return true;
+    }
+    return false;
 }
 
 template <typename T>
 std::vector<T> SLinkedList<T>::to_vector() const {
     std::vector<T> values;
     values.reserve(size_);
-    for (SNode<T>* current = head_; current != nullptr; current = current->next) {
+    for (SNode<T>* current = head_->next; current != nullptr; current = current->next) {
         values.push_back(current->value);
     }
     return values;
@@ -124,5 +168,12 @@ std::vector<T> SLinkedList<T>::to_vector() const {
 
 template <typename T>
 void SLinkedList<T>::clear() {
-//TODO: Implement the clear function for the SLinkedList class
+    SNode<T>* curr = head_->next;
+    while (curr != nullptr) {
+        SNode<T>* nextNode = curr->next;
+        delete curr;
+        curr = nextNode;
+    }
+    head_->next = nullptr;
+    size_ = 0;
 }
